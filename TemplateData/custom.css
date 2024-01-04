@@ -1,0 +1,88 @@
+
+#music {
+  transform: translate(55%, 55%);
+  border-radius: 50%;
+  overflow: hidden;
+  position: absolute;
+}
+#vid {
+  border-radius: 150%;
+  width: 55vh;
+  height: 55vh;
+  object-fit: cover;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 14vh;
+}
+#copy {
+  background-color: rgba(0, 0, 255, 0.5);
+  color: white;
+  border-radius: 3%;
+  /* padding: 0.5em 1em; */
+}
+
+#chat {
+  margin: auto;
+}
+
+#participants {
+  position: absolute;
+  margin-top: 20vh;
+}
+
+#tooltip {
+  position: fixed;
+  right: 1em;
+  bottom: 1em;
+}
+
+/*  */
+
+* {
+  box-sizing: border-box;
+  /* so borders and padding dont get in the way */
+}
+
+#participants > div {
+  position: absolute;
+  width: 20vw;
+  height: 20vw;
+  overflow: hidden;
+  border-radius: 50%;
+  z-index: 0;
+}
+
+#ID {
+  position: absolute;
+  bottom: -1vw;
+  right: -1vw;
+  width: 22vw;
+  height: 22vw;
+  transform: scale(-1, 1.5);
+  visibility: hidden;
+}
+
+#participants > div > video {
+  position: absolute;
+  bottom: -1vw;
+  right: -2vw;
+  width: 22vw;
+  height: 22vw;
+  transform: scale(-1, 1.6);
+}
+
+.inner {
+  opacity: 1;
+  position: absolute;
+  z-index: 1;
+  bottom: -0.5vw;
+  right: -0.5vw;
+  width: 21vw;
+  height: 21vw;
+}
+
+video {
+  -webkit-transform: scaleX(-1);
+  transform: scaleX(-1);
+}

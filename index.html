@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Mbaye</title>
+    <script
+      src="https://cdn.onesignal.com/sdks/OneSignalSDK.js"
+      async=""
+    ></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css"
+      integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk="
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://cdn.socket.io/4.1.3/socket.io.min.js"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"
+      crossorigin="anonymous"
+    ></script>
+
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/qs/6.9.2/qs.min.js"
+      integrity="sha256-TDxXjkAUay70ae/QJBEpGKkpVslXaHHayklIVglFRT4="
+      crossorigin="anonymous"
+    ></script>
+    <link rel="shortcut icon" href="TemplateData/favicon.ico" />
+    <link rel="stylesheet" href="TemplateData/style.css" />
+    <link rel="stylesheet" href="TemplateData/custom.css" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="//fonts.googleapis.com/css?family=Play"
+    />
+    <script src="https://code.jquery.com/jquery-1.12.1.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/qs/dist/qs.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script>
+      var chatFriends = document.getElementById("chatFriends");
+      function handleUrlChange() {
+        const { roomId } = Qs.parse(location.search, {
+          ignoreQueryPrefix: true,
+        });
+        console.log("roomId " + roomId);
+        if (roomId != "") {
+          globalunityInstance.SendMessage(
+            "BubbleSystem",
+            "PrepDirectVideoCall",
+            roomId
+          );
+        }
+      }
+      window.addEventListener("popstate", handleUrlChange);
+    </script>
+
+    <style>
+      .alert {
+        font-family: Play;
+        font-size: larger;
+        padding: 20px;
+        width: 10vw;
+        background-color: #f44336;
+        color: rgb(124, 248, 0);
+        opacity: 1;
+        transition: opacity 0.6s;
+        margin-top: 15px;
+      }
+
+      .alert.warning {
+        left: 40vw;
+        top: -2vh;
+        width: 20vw;
+        border: 3px solid rgb(124, 248, 0);
+        background-color: rgba(255, 255, 255, 0);
+        position: absolute;
+      }
+
+      .closebtn {
+        font-size: large;
+        font-family: Play;
+        margin-left: 15px;
+        color: rgb(124, 248, 0);
+        font-weight: bold;
+        float: right;
+        line-height: 20px;
+        cursor: pointer;
+        transition: 0.3s;
+      }
+
+      .closebtn:hover {
+        color: rgb(255, 255, 255);
+      }
+      ::placeholder {
+        color: white;
+        opacity: 1; /* Firefox */
+      }
+
+      ::-ms-input-placeholder {
+        /* Edge 12 -18 */
+        color: white;
+      }
+      select {
+        margin-top: 1.3vh;
+        padding-left: 0.5%;
+        background-color: #00034c;
+        color: white;
+        height: 4.5vh;
+        width: 36vw;
+        font-family: Play;
+        font-size: large;
+      }
+
+      input {
+        margin-top: 1.3vh;
+        padding-left: 1.5%;
+        background-color: #00034c;
+        color: white;
+        height: 4.5vh;
+        width: 36vw;
+        font-family: Play;
+        font-size: large;
+      }
+      label.label input[type="file"] {
+        position: absolute;
+        top: -1000px;
+      }
+      .label {
+        font-family: Play;
+        cursor: pointer;
+        color: white;
+        border: 1px solid #cccccc;
+        border-radius: 5px;
+        padding: 5px 15px;
+        margin: 5px;
+        background: #6e6e6e;
+        display: inline-block;
+        font-size: medium;
+        transform: translate(225%, 125%);
+      }
+      .label:hover {
+        background: #5b5b5b;
+      }
+      .label:active {
+        background: #6e6e6e;
+      }
+      .label:invalid + span {
+        color: #000000;
+      }
+      .label:valid + span {
+        color: #ffffff;
+      }
+      #register2 {
+        z-index: 1000 !important;
+        position: absolute;
+        top: 50%;
+        left: 45%;
+        transform: translate(-37%, -83%);
+      }
+    </style>
+    <script>
+      var globalunityInstance = null;
+    </script>
+  </head>
+  <body id="main" onload="registerSW()">
+    <div id="root"></div>
+    <div id="unity-container" class="unity-desktop" onclick="Fullscreen()">
+      <canvas id="unity-canvas" width="960" height="600" tabindex="-1"></canvas>
+      <div id="unity-loading-bar">
+        <div id="unity-logo"></div>
+        <div id="unity-progress-bar-empty">
+          <div id="unity-progress-bar-full"></div>
+        </div>
+      </div>
+    </div>
+    <iframe
+      hidden
+      onclick="Fullscreen()"
+      id="chatFriends"
+      src="chat.html"
+      style="
+        position: absolute;
+        height: 33.5%;
+        width: 42%;
+        margin-left: 155px;
+        margin-top: 155px;
+      "
+      scrolling="no"
+      frameborder="0px"
+    ></iframe>
+    <input
+      hidden
+      onchange="chatFriends.contentWindow.Upload(this);"
+      type="file"
+      accept="image/*"
+      name=""
+      id="uploadImg"
+      style="
+        position: absolute;
+        width: 69px;
+        height: 59px;
+        margin-top: 27%;
+        margin-left: 2%;
+        opacity: 0;
+      "
+    />
+    <div id="webcamFeed" hidden>
+      <video id="vid"></video>
+      <button
+        onclick="snapshot()"
+        style="
+          background-color: rgb(216 242 175);
+          transform: translate(47vw, 0%);
+          padding: 10px;
+        "
+      >
+        <h3>CLICK</h3>
+      </button>
+      <canvas id="myCanvas" width="400" height="350" hidden></canvas>
+    </div>
+    <div id="endCall"></div>
+    <div id="hideVideo"></div>
+    <div id="muteAudio"></div>
+    <div id="chat" hidden>
+      <div id="participants" hidden></div>
+    </div>
+    <div
+      id="picAstronaut"
+      style="
+        visibility: hidden;
+        width: auto;
+        height: 100vh;
+        display: flex;
+        position: relative;
+        justify-content: center;
+        align-items: center;
+        transform: scale(1.5);
+        left: 15vw;
+        background-color: rgba(0, 0, 0, 0.3);
+      "
+    >
+      <label class="get_pic">
+        <input
+          type="file"
+          accept="image/jpeg, image/png, image/jpg"
+          onchange="encodeImageFileAsURL(this)"
+          style="
+            margin-top: 1.3vh;
+            padding-left: 1.5%;
+            background-color: #00034c00;
+            color: white;
+            height: 5.5vh;
+            width: 36vw;
+            font-family: Play;
+            font-size: medium;
+          "
+        />
+      </label>
+    </div>
+    <div id="register2" hidden="true">
+      <!-- Date -->
+      <input
+        type="text"
+        placeholder="Date of Birth"
+        id="datepicker"
+        class="disableFuturedate"
+      />
+      <!-- <input id="datepicker" type="date" onfocus="this.showPicker()" /> -->
+      <br />
+      <!-- Gender -->
+      <select id="gender" name="gender" required></select>
+      <br />
+      <!-- Country -->
+      <select id="country" name="country" required></select>
+      <br />
+      <!-- State -->
+      <select id="state" name="state" required></select>
+      <br />
+      <!-- City -->
+      <select id="city" name="city" required></select>
+      <br />
+      <!-- Address -->
+      <input
+        style="background-color: #00034c; color: white"
+        type="text"
+        placeholder="Address"
+        id="Address"
+        name="Address"
+        value=""
+      />
+      <br />
+      <!-- School -->
+      <input
+        style="background-color: #00034c; color: white"
+        type="text"
+        placeholder="School"
+        id="School"
+        name="School"
+        value=""
+      />
+      <br /><br />
+      <!-- Photo -->
+
+      <label class="label">
+        <input
+          type="file"
+          accept="image/jpeg, image/png, image/jpg"
+          onchange="encodeImageFileAsURL(this)"
+        />
+        <span>Browse</span>
+      </label>
+      <br />
+      <img hidden id="myImg" src="#" />
+    </div>
+    <div class="alert warning">
+      <span class="closebtn">Okay</span>
+      <strong>Grant Permissions?</strong>
+    </div>
+    <script>
+      var close = document.getElementsByClassName("closebtn")[0];
+      var i;
+      close.onclick = function () {
+        Fullscreen();
+        GetPermissionClick();
+
+        var div = this.parentElement;
+        div.style.opacity = "0";
+        setTimeout(function () {
+          div.style.display = "none";
+        }, 600);
+      };
+    </script>
+    <script>
+      let cityId,
+        countryId,
+        stateId,
+        genderId,
+        address,
+        school,
+        dateOfBirth,
+        profilePicture;
+      let city, country, state, gender;
+      function convertDate(dateString) {
+        //  Convert a "dd/MM/yyyy" string into a Date object
+        let d = dateString.split("/");
+        let dat = d[1] + "/" + d[0] + "/" + d[2];
+        return dat;
+      }
+      $(document).ready(function () {
+        var currentDate = new Date();
+        $(".disableFuturedate")
+          .datepicker({
+            format: "dd/mm/yyyy",
+            autoclose: true,
+            endDate: "currentDate",
+            maxDate: currentDate,
+            changeYear: true,
+            changeMonth: true,
+            yearRange: "-130:+0",
+            onSelect: function (dateText, inst) {
+              var dateAsString = dateText; //the first parameter of this function
+              var dateAsObject = $(this).datepicker("getDate"); //the getDate method
+              dateOfBirth = convertDate(dateAsString);
+              document.querySelector("#datepicker").value = dateOfBirth;
+            },
+          })
+          .on("changeDate", function (ev) {
+            $(this).datepicker("hide");
+          });
+        $(".disableFuturedate").keyup(function () {
+          if (this.value.match(/[^0-9]/g)) {
+            this.value = this.value.replace(/[^0-9^-]/g, "");
+            this.value = convertDate(this.value);
+          }
+        });
+      });
+      register2 = document.getElementById("register2");
+      function DisplayRegisterPart2() {
+        register2.removeAttribute("hidden");
+
+        if (localStorage.getItem("Address") != null)
+          document.querySelector("#Address").value =
+            localStorage.getItem("Address");
+
+        if (localStorage.getItem("city") != null)
+          document.querySelector("#city").value = localStorage.getItem("city");
+
+        if (localStorage.getItem("country") != null)
+          document.querySelector("#country").value =
+            localStorage.getItem("country");
+
+        if (localStorage.getItem("state") != null)
+          document.querySelector("#state").value =
+            localStorage.getItem("state");
+
+        if (localStorage.getItem("gender") != null)
+          document.querySelector("#gender").value =
+            localStorage.getItem("gender");
+
+        if (localStorage.getItem("datepicker") != null)
+          document.querySelector("#datepicker").value =
+            localStorage.getItem("datepicker");
+
+        if (localStorage.getItem("School") != null)
+          document.querySelector("#School").value =
+            localStorage.getItem("School");
+
+        myStateRequest = new Request(
+          "https://dev-api.inoxarabia.com/api/common/states/" +
+            document.querySelector("#country").value,
+          {
+            method: "GET",
+          }
+        );
+        fetchStateData(myStateRequest);
+
+        myCityRequest = new Request(
+          "https://dev-api.inoxarabia.com/api/common/cities/" +
+            document.querySelector("#state").value,
+          {
+            method: "GET",
+          }
+        );
+        fetchCityData(myCityRequest);
+      }
+
+      function HideRegisterPart2() {
+        register2.setAttribute("hidden", "true");
+      }
+      function _SaveTex(data) {
+        // Put the object into storage
+        // localStorage.setItem("texture", data);
+      }
+      function _SaveEmail(data) {
+        // Put the object into storage
+        localStorage.setItem("email", data);
+
+        req = new Request("https://dev-api.inoxarabia.com/api/users/" + data, {
+          method: "GET",
+        });
+        fetchData(req);
+      }
+      async function fetchData(request) {
+        try {
+          const response = await fetch(request);
+          let myJson = await response.json();
+          if (
+            localStorage.getItem("password") != "" ||
+            localStorage.getItem("password") != null
+          ) {
+            chatFriends.contentWindow.SetUserId(myJson._id);
+          }
+        } catch (error) {
+          console.error("Error:", error);
+        }
+      }
+      function _SavePass(data) {
+        // Put the object into storage
+        localStorage.setItem("password", data);
+        req = new Request(
+          "https://dev-api.inoxarabia.com/api/users/" +
+            localStorage.getItem("email"),
+          {
+            method: "GET",
+          }
+        );
+        fetchData(req);
+      }
+      function setRegisterData() {
+        address = document.querySelector("#Address").value;
+        city = document.querySelector("#city").value;
+        country = document.querySelector("#country").value;
+        state = document.querySelector("#state").value;
+        gender = document.querySelector("#gender").value;
+        school = document.querySelector("#School").value;
+        dateOfBirth = document.querySelector("#datepicker").value;
+
+        genderId = GenderNameID[document.querySelector("#gender").value];
+        stateId = state;
+        cityId = city;
+        countryId = country;
+
+        localStorage.setItem("country", country);
+        localStorage.setItem("state", state);
+        localStorage.setItem("gender", gender);
+        localStorage.setItem("School", school);
+        localStorage.setItem("Address", address);
+        localStorage.setItem("datepicker", dateOfBirth);
+        localStorage.setItem("city", city);
+      }
+      function GetRegisterDetails() {
+        setRegisterData();
+        let data =
+          cityId +
+          "|" +
+          countryId +
+          "|" +
+          stateId +
+          "|" +
+          genderId +
+          "|" +
+          address +
+          "|" +
+          school +
+          "|" +
+          dateOfBirth +
+          "|" +
+          profilePicture;
+        console.log(data);
+        globalunityInstance.SendMessage(
+          "BubbleSystem",
+          "ReceivedDataREGISTER",
+          data
+        );
+      }
+      function toDataURL(url, callback) {
+        let xhRequest = new XMLHttpRequest();
+        xhRequest.onload = function () {
+          let reader = new FileReader();
+          reader.onloadend = function () {
+            callback(reader.result);
+          };
+          reader.readAsDataURL(xhRequest.response);
+        };
+        xhRequest.open("GET", url);
+        xhRequest.responseType = "blob";
+        xhRequest.send();
+      }
+      function Tex(make, base64, URL) {
+        this.base64 = base64;
+        this.URL = URL;
+      }
+
+      function _GetTex() {
+        if (globalunityInstance == null) return;
+        // Retrieve the object from storage
+        var email = localStorage.getItem("email");
+        var password = localStorage.getItem("password");
+        if (password != "" || password != undefined || password != null) {
+          req = new Request(
+            "https://dev-api.inoxarabia.com/api/users/" + email,
+            {
+              method: "GET",
+            }
+          );
+          fetchData(req);
+        }
+        globalunityInstance.SendMessage(
+          "BubbleSystem",
+          "GetEmailCached",
+          email
+        );
+        globalunityInstance.SendMessage(
+          "BubbleSystem",
+          "GetPassCached",
+          password
+        );
+      }
+      // }
+    </script>
+    <script>
+      function GetDate() {
+        var date = $("#datepicker")
+          .datepicker({ dateFormat: "dd,MM,yyyy" })
+          .val();
+      }
+    </script>
+    <script>
+      var option = document.createElement("option");
+      var select = document.getElementById("country");
+      option.text = option.value = "Select Country";
+      select.add(option, 0);
+      select.value = "Select Country";
+
+      var option = document.createElement("option");
+      var select = document.getElementById("state");
+      option.text = option.value = "Select State/County/Region";
+      select.add(option, 0);
+      select.value = "Select State/County/Region";
+
+      var option = document.createElement("option");
+      var select = document.getElementById("city");
+      option.text = option.value = "Select City/Town";
+      select.add(option, 0);
+      select.value = "Select City/Town";
+
+      let GenderNameID = {};
+      //Gender
+      async function fetchGenderData(request) {
+        try {
+          const response = await fetch(request);
+          const myJson = await response.json();
+          // console.log(myJson);
+          var select = document.getElementById("gender");
+          for (var i = 0; i < myJson.length; i++) {
+            var option = document.createElement("option");
+            option.text = option.value = myJson[i].name;
+            select.add(option, 0);
+            GenderNameID[myJson[i].name] = myJson[i]._id;
+          }
+          select.value = myJson[myJson.length - 1].name;
+        } catch (error) {
+          console.error("Error:", error);
+        }
+      }
+
+      const myRequest = new Request(
+        "https://dev-api.inoxarabia.com/api/common/gender",
+        {
+          method: "GET",
+        }
+      );
+
+      fetchGenderData(myRequest);
+
+      //Country
+      async function fetchCountryData(request) {
+        try {
+          const response = await fetch(request);
+
+          let myJson = await response.json();
+          var select = document.getElementById("country");
+          for (var i = 0; i < myJson.Countries.length; i++) {
+            var option = document.createElement("option");
+            option.text = option.value = myJson.Countries[i].name;
+            select.add(option, myJson.Countries.length - 1);
+          }
+          select.value = "Select Country";
+        } catch (error) {
+          console.error("Error:", error);
+        }
+      }
+
+      const myCountryRequest = new Request(
+        "https://dev-api.inoxarabia.com/api/common/countries",
+        {
+          method: "GET",
+        }
+      );
+      let myStateRequest = new Request(
+        "https://dev-api.inoxarabia.com/api/common/states",
+        {
+          method: "GET",
+        }
+      );
+      let myCityRequest = new Request(
+        "https://dev-api.inoxarabia.com/api/common/cities",
+        {
+          method: "GET",
+        }
+      );
+      fetchCountryData(myCountryRequest);
+
+      //State
+      async function fetchStateData(request) {
+        try {
+          const response = await fetch(request);
+
+          let myJson = await response.json();
+          // console.log(myJson.states.length);
+          var select = document.getElementById("state");
+          select.options.length = 0;
+          for (var i = 0; i < myJson.States.length; i++) {
+            var option = document.createElement("option");
+            option.text = option.value = myJson.States[i].name;
+            select.add(option, 0);
+          }
+          select.value = myJson.States[myJson.States.length - 1].name;
+          var input = select.value;
+          console.log(input);
+          if (input == "NA") {
+            var option = document.createElement("option");
+            var select = document.getElementById("city");
+            option.text = option.value = "NA";
+            select.add(option, 0);
+            select.value = "NA";
+            return;
+          }
+          myCityRequest = new Request(
+            "https://dev-api.inoxarabia.com/api/common/cities/" + input,
+            {
+              method: "GET",
+            }
+          );
+          fetchCityData(myCityRequest);
+          console.log(input);
+        } catch (error) {
+          console.error("Error:", error);
+        }
+      }
+
+      document
+        .getElementById("country")
+        .addEventListener("change", function () {
+          var input = this.value;
+          // console.log(countryNameID[input]);
+          myStateRequest = new Request(
+            "https://dev-api.inoxarabia.com/api/common/states/" + input,
+            {
+              method: "GET",
+            }
+          );
+          fetchStateData(myStateRequest);
+        });
+      //City
+      async function fetchCityData(request) {
+        try {
+          const response = await fetch(request);
+
+          let myJson = await response.json();
+          // console.log(myJson.cities);
+          var select = document.getElementById("city");
+          select.options.length = 0;
+          for (var i = 0; i < myJson.Cities.length; i++) {
+            var option = document.createElement("option");
+            option.text = option.value = myJson.Cities[i].name;
+            select.add(option, 0);
+          }
+          select.value = myJson.Cities[myJson.Cities.length - 1].name;
+          var input = select.value;
+        } catch (error) {
+          console.error("Error:", error);
+        }
+      }
+
+      document.getElementById("state").addEventListener("change", function () {
+        var input = this.value;
+        console.log(input);
+        if (input == "NA") {
+          var option = document.createElement("option");
+          var select = document.getElementById("city");
+          option.text = option.value = "NA";
+          select.add(option, 0);
+          select.value = "NA";
+          return;
+        }
+        myCityRequest = new Request(
+          "https://dev-api.inoxarabia.com/api/common/cities/" + input,
+          {
+            method: "GET",
+          }
+        );
+        fetchCityData(myCityRequest);
+        // console.log(input);
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.5/lodash.min.js"></script>
+    <script src="https://sdk.twilio.com/js/video/releases/2.27.0/twilio-video.js"></script>
+    <script src="video.js"></script>
+    <script>
+      /* Get the element you want displayed in fullscreen mode (a video in this example): */
+      var elem = document.getElementById("main");
+
+      function Fullscreen() {
+        var docelem = document.documentElement;
+        if (docelem.requestFullscreen) {
+          docelem.requestFullscreen();
+        } else if (docelem.mozRequestFullScreen) {
+          docelem.mozRequestFullScreen();
+        } else if (docelem.webkitRequestFullscreen) {
+          docelem.webkitRequestFullscreen();
+        } else if (docelem.msRequestFullscreen) {
+          docelem.msRequestFullscreen();
+        }
+      }
+    </script>
+    <script>
+      var webcamStream;
+      let myCanvas = document.querySelector("#myCanvas");
+      let video = document.getElementById("vid");
+      let webcamFeed = document.getElementById("webcamFeed");
+      let camOn = false;
+      function stopWebcam() {
+        webcamStream.stop();
+      }
+      //---------------------
+      // TAKE A SNAPSHOT CODE
+      //---------------------
+      function snapshot() {
+        navigator.permissions.query({ name: "camera" }).then((res) => {
+          if (res.state == "granted") {
+            Fullscreen();
+            myCanvas
+              .getContext("2d")
+              .drawImage(video, 0, 0, myCanvas.width, myCanvas.height);
+            // JPEG base64
+            let image_base64 = myCanvas
+              .toDataURL("image/jpeg")
+              .replace(/^data:image\/jpeg;base64,/, "");
+            globalunityInstance.SendMessage(
+              "PlanetSystem",
+              "SaveRTToFile",
+              image_base64
+            );
+            webcamFeed.setAttribute("hidden", "true"); // has permission
+          }
+        });
+      }
+      function Webcam() {
+        navigator.permissions.query({ name: "camera" }).then((res) => {
+          if (res.state == "granted") {
+            webcamFeed.removeAttribute("hidden");
+
+            console.log("off");
+            globalunityInstance.SendMessage(
+              "VideoStreamingManager",
+              "Continue"
+            );
+          }
+        });
+      }
+    </script>
+    <script>
+      var frame = document.querySelector("#frame");
+      var music = document.querySelector("#music");
+      var container = document.querySelector("#unity-container");
+      var canvas = document.querySelector("#unity-canvas");
+      var loadingBar = document.querySelector("#unity-loading-bar");
+      var progressBarFull = document.querySelector("#unity-progress-bar-full");
+      let musicUrl = "";
+      let isFullscreen = false;
+      var pauseButton = document.getElementById("pause-button");
+      var playButton = document.getElementById("play-button");
+      var playlistButton = document.getElementById("playlist-button");
+      let picGetter = document.getElementById("picAstronaut");
+      function showOptionToGetPic() {
+        picGetter.style.visibility = "visible";
+      }
+      function GetPermission() {
+        let mediaDevices = navigator.mediaDevices;
+        vid.muted = true;
+        // Accessing the user camera and video.
+        mediaDevices
+          .getUserMedia({
+            video: true,
+            audio: true,
+          })
+          .then((stream) => {
+            // Changing the source of video to current stream.
+            video.srcObject = stream;
+            webcamStream = stream;
+            video.addEventListener("loadedmetadata", () => {
+              video.play();
+              camOn = true;
+            });
+          });
+      }
+      function GetPermissionClick() {
+        let mediaDevices = navigator.mediaDevices;
+        vid.muted = true;
+        // Accessing the user camera and video.
+        mediaDevices.getUserMedia({
+          video: true,
+          audio: true,
+        });
+      }
+      function encodeImageFileAsURL(element) {
+        let file = element.files[0];
+        let reader = new FileReader();
+        reader.onloadend = function () {
+          globalunityInstance.SendMessage(
+            "123456",
+            "ReceiveImage",
+            reader.result
+          );
+          profilePicture = reader.result;
+          console.log(reader.result);
+          picGetter.style.visibility = "hidden";
+        };
+        reader.readAsDataURL(file);
+      }
+      var buildUrl = "Build";
+      var loaderUrl = buildUrl + "/B2.loader.js";
+      var config = {
+        dataUrl: buildUrl + "/B2.data.unityweb",
+        frameworkUrl: buildUrl + "/B2.framework.js.unityweb",
+        codeUrl: buildUrl + "/B2.wasm.unityweb",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "DefaultCompany",
+        productName: "Mbaye",
+        productVersion: "0.1.0",
+      };
+
+      const socket = io("wss://dev-api.inoxarabia.com", {
+        transports: ["websocket"],
+      });
+      // Event handler for connection success
+      socket.on("connect", async () => {
+        console.log("Socket.IO connected:", socket.id);
+      });
+      socket.on("error", (error) => {
+        console.error("Socket.IO error:", error);
+      });
+      socket.on("status-sent", (event) => {
+        const result = event;
+        console.log(result);
+        if (
+          result.is_login === true &&
+          localStorage["email"] != "" &&
+          localStorage["email"] != undefined
+        ) {
+          fetchDataUser();
+        }
+      });
+      const fetchDataUser = async () => {
+        try {
+          const response = await fetch(
+            "https://dev-api.inoxarabia.com/api/users/" + localStorage["email"]
+          );
+          const result = await response.json();
+          console.log(result["_id"]);
+          if (result["_id"] != "" || result["_id"] != undefined) {
+            console.log(result["_id"] + "subscribing now");
+            window.OneSignal = window.OneSignal || [];
+            const OneSignal = window.OneSignal;
+            OneSignal.push(() => {
+              OneSignal.setExternalUserId(result["_id"]);
+              OneSignal.init({
+                appId: "be18a344-2f26-4152-a30c-dcb813f8905d",
+                allowLocalhostAsSecureOrigin: true,
+              });
+            });
+          }
+        } catch (error) {
+          console.error("Error fetching data:", error);
+        }
+      };
+      function registerSW() {
+        if ("serviceWorker" in navigator) {
+          navigator.serviceWorker.register("OneSignalSDKWorker.js");
+          //...
+          console.log("serviceWorker");
+          if (localStorage["email"] != "" && localStorage["email"] != undefined)
+            fetchDataUser();
+        }
+      }
+      // By default Unity keeps WebGL canvas render target size matched with
+      // the DOM size of the canvas element (scaled by window.devicePixelRatio)
+      // Set this to false if you want to decouple this synchronization from
+      // happening inside the engine, and you would instead like to size up
+      // the canvas DOM size and WebGL render target sizes yourself.
+      // config.matchWebGLToCanvasSize = false;
+
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        // Mobile device style: fill the whole browser client area with the game canvas:
+
+        var meta = document.createElement("meta");
+        meta.name = "viewport";
+        meta.content =
+          "width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes";
+        document.getElementsByTagName("head")[0].appendChild(meta);
+        container.className = "unity-mobile";
+        canvas.className = "unity-mobile";
+
+        // To lower canvas resolution on mobile devices to gain some
+        // performance, uncomment the following line:
+
+        config.devicePixelRatio = 1;
+      } else {
+        config.devicePixelRatio = 1.3;
+        // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
+        canvas.style.width = "100vw";
+        canvas.style.height = "100vh";
+      }
+      loadingBar.style.display = "block";
+
+      var script = document.createElement("script");
+      script.src = loaderUrl;
+      script.onload = () => {
+        createUnityInstance(canvas, config, (progress) => {
+          progressBarFull.style.width = 100 * progress + "%";
+        })
+          .then((unityInstance) => {
+            loadingBar.style.display = "none";
+            globalunityInstance = unityInstance;
+          })
+          .catch((message) => {});
+      };
+
+      document.body.appendChild(script);
+    </script>
+  </body>
+</html>
